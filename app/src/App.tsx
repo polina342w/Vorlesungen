@@ -200,17 +200,6 @@ function App() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
   }, [entries])
 
-  useEffect(() => {
-    if (editingId) {
-      return
-    }
-
-    setForm((current) => ({
-      ...current,
-      dayIndex: getDefaultDayIndex(now, currentWeekStart),
-    }))
-  }, [currentWeekStart, editingId, now])
-
   const currentWeekEntries = sortEntries(
     entries.filter((entry) => entry.weekKey === currentWeekKey),
   )
