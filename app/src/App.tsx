@@ -528,12 +528,12 @@ function App() {
               <p className="summary-label">Kalender</p>
               <h3>Montag bis Freitag</h3>
             </div>
-            <span className="mobile-hint">iPhone-optimiert und scrollbar</span>
+            <span className="mobile-hint">Kompakt fuer iPhone und Desktop</span>
           </div>
 
           <div className="planner-grid" aria-label="Wochenkalender">
             <div className="timeline-column" aria-hidden="true">
-              <div className="timeline-spacer" />
+              <div className="timeline-spacer">Zeit</div>
               {timeMarks.slice(0, -1).map((minutes) => (
                 <div key={minutes} className="time-label">
                   {pad(Math.floor(minutes / 60))}:00
@@ -541,58 +541,70 @@ function App() {
               ))}
             </div>
 
-            <div className="days-grid">
-              {weekDays.map(({ label, date, items, dayIndex }) => (
-                <section key={label} className="day-column">
-                  <header className="day-header">
-                    <strong>{label}</strong>
+            <div className="planner-stage">
+              <div className="days-header-row">
+                {weekDays.map(({ label, date }) => (
+                  <div key={`${label}-header`} className="day-pill">
+                    <strong>{label.slice(0, 2)}</strong>
                     <span>{formatHeaderDate(date)}</span>
-                  </header>
-
-                  <div className="day-surface">
-                    {timeMarks.slice(0, -1).map((minutes) => (
-                      <div key={`${label}-${minutes}`} className="grid-line" />
-                    ))}
-
-                    {items.map((entry) => {
-                      const startMinutes = parseTimeToMinutes(entry.start)
-                      const endMinutes = parseTimeToMinutes(entry.end)
-                      const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
-                      const top = ((startMinutes - DAY_START_HOUR * 60) / totalRange) * 100
-                      const height = ((endMinutes - startMinutes) / totalRange) * 100
-
-                      return (
-                        <button
-                          key={entry.id}
-                          type="button"
-                          className={`entry-block ${people[entry.person].accent}`}
-                          style={{ top: `${top}%`, height: `${height}%` }}
-                          onClick={() => handleEdit(entry)}
-                        >
-                          <span className="entry-time">
-                            {entry.start} - {entry.end}
-                          </span>
-                          <strong>{entry.title}</strong>
-                          {entry.note ? <small>{entry.note}</small> : null}
-                        </button>
-                      )
-                    })}
-
-                    {items.length === 0 ? (
-                      <button
-                        type="button"
-                        className="empty-day"
-                        onClick={() => {
-                          setEditingId(null)
-                          setForm((current) => ({ ...current, dayIndex }))
-                        }}
-                      >
-                        Frei · Termin hinzufuegen
-                      </button>
-                    ) : null}
                   </div>
-                </section>
-              ))}
+                ))}
+              </div>
+
+              <div className="days-grid">
+                {weekDays.map(({ label, date, items, dayIndex }) => (
+                  <section key={label} className="day-column">
+                    <div className="day-surface">
+                      <div className="day-surface-label" aria-hidden="true">
+                        <span>{label}</span>
+                        <strong>{formatHeaderDate(date)}</strong>
+                      </div>
+
+                      {timeMarks.slice(0, -1).map((minutes) => (
+                        <div key={`${label}-${minutes}`} className="grid-line" />
+                      ))}
+
+                      {items.map((entry) => {
+                        const startMinutes = parseTimeToMinutes(entry.start)
+                        const endMinutes = parseTimeToMinutes(entry.end)
+                        const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
+                        const top = ((startMinutes - DAY_START_HOUR * 60) / totalRange) * 100
+                        const height = ((endMinutes - startMinutes) / totalRange) * 100
+
+                        return (
+                          <button
+                            key={entry.id}
+                            type="button"
+                            className={`entry-block ${people[entry.person].accent}`}
+                            style={{ top: `${top}%`, height: `${height}%` }}
+                            onClick={() => handleEdit(entry)}
+                          >
+                            <span className="entry-person">{people[entry.person].label}</span>
+                            <strong>{entry.title}</strong>
+                            <span className="entry-time">
+                              {entry.start} - {entry.end}
+                            </span>
+                            {entry.note ? <small>{entry.note}</small> : null}
+                          </button>
+                        )
+                      })}
+
+                      {items.length === 0 ? (
+                        <button
+                          type="button"
+                          className="empty-day"
+                          onClick={() => {
+                            setEditingId(null)
+                            setForm((current) => ({ ...current, dayIndex }))
+                          }}
+                        >
+                          Frei · Termin hinzufuegen
+                        </button>
+                      ) : null}
+                    </div>
+                  </section>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -608,7 +620,8 @@ function App() {
 
                 {items.map((entry) => (
                   <div key={`${entry.id}-mobile`} className={`mobile-entry ${people[entry.person].accent}`}>
-                    <div>
+                    <div className="mobile-entry-copy">
+                      <span className="mobile-person-tag">{people[entry.person].label}</span>
                       <p>
                         {entry.start} - {entry.end}
                       </p>
