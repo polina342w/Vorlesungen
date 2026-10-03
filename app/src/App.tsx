@@ -581,10 +581,12 @@ function App() {
                           >
                             <span className="entry-person">{people[entry.person].label}</span>
                             <strong>{entry.title}</strong>
-                            <span className="entry-time">
-                              {entry.start} - {entry.end}
-                            </span>
-                            {entry.note ? <small>{entry.note}</small> : null}
+                            <div className="entry-footer">
+                              <span className="entry-time">
+                                {entry.start} - {entry.end}
+                              </span>
+                              {entry.note ? <small>{entry.note}</small> : null}
+                            </div>
                           </button>
                         )
                       })}
