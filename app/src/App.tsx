@@ -295,33 +295,18 @@ function App() {
   })
 
   const [weekOffset, setWeekOffset] = useState(() => {
-    const currentWeekDate = getMonday(now)
     const weekKeys = [...new Set(entries.map((entry) => entry.weekKey))]
 
     if (weekKeys.length === 0) {
       return 0
     }
 
-    const currentWeekKey = formatDateKey(currentWeekDate)
-    const matchingIndex = weekKeys.findIndex((weekKey) => weekKey === currentWeekKey)
-    if (matchingIndex !== -1) {
-      return 0
-    }
+    const firstWeekKey = [...weekKeys].sort()[0]
+    const firstWeekDate = new Date(`${firstWeekKey}T00:00:00`)
+    const currentWeekDate = getMonday(now)
+    const differenceInDays = firstWeekDate.getTime() - currentWeekDate.getTime()
 
-    let closestOffset = 0
-    let smallestDistance = Number.POSITIVE_INFINITY
-
-    weekKeys.forEach((weekKey) => {
-      const weekDate = new Date(`${weekKey}T00:00:00`)
-      const distance = Math.abs(weekDate.getTime() - currentWeekDate.getTime())
-
-      if (distance < smallestDistance) {
-        smallestDistance = distance
-        closestOffset = Math.round((weekDate.getTime() - currentWeekDate.getTime()) / 604800000)
-      }
-    })
-
-    return closestOffset
+    return Math.round(differenceInDays / 604800000)
   })
 
   const currentWeekStart = addWeeks(getMonday(now), weekOffset)
