@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
 import './App.css'
 
@@ -36,71 +36,59 @@ const people: Record<PersonId, { label: string; accent: string }> = {
 
 const weekdayLabels = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag']
 
-const buildSeedEntries = (weekStart: Date): ScheduleEntry[] => {
-  const weekKey = formatDateKey(weekStart)
+const rosaSeedSlots = [
+  { date: '2026-10-13', start: '11:00', end: '12:00' },
+  { date: '2026-10-13', start: '16:00', end: '16:30' },
+  { date: '2026-10-14', start: '09:30', end: '12:00' },
+  { date: '2026-10-14', start: '13:00', end: '16:00' },
+  { date: '2026-10-15', start: '13:00', end: '16:00' },
+  { date: '2026-10-19', start: '08:30', end: '12:00' },
+  { date: '2026-10-21', start: '09:30', end: '12:00' },
+  { date: '2026-10-22', start: '09:00', end: '12:00' },
+  { date: '2026-10-22', start: '13:00', end: '16:00' },
+  { date: '2026-10-29', start: '09:00', end: '12:00' },
+  { date: '2026-10-29', start: '13:00', end: '16:00' },
+  { date: '2026-11-02', start: '08:30', end: '12:00' },
+  { date: '2026-11-03', start: '08:30', end: '12:00' },
+  { date: '2026-11-03', start: '13:00', end: '15:30' },
+  { date: '2026-11-04', start: '09:30', end: '12:00' },
+  { date: '2026-11-09', start: '08:30', end: '12:00' },
+  { date: '2026-11-11', start: '09:30', end: '12:00' },
+  { date: '2026-11-11', start: '13:00', end: '16:00' },
+  { date: '2026-11-13', start: '09:00', end: '12:00' },
+  { date: '2026-11-16', start: '08:30', end: '12:00' },
+  { date: '2026-11-18', start: '13:00', end: '16:00' },
+  { date: '2026-11-20', start: '09:00', end: '13:00' },
+  { date: '2026-11-23', start: '08:30', end: '12:00' },
+  { date: '2026-11-25', start: '09:30', end: '12:00' },
+  { date: '2026-11-30', start: '08:30', end: '12:00' },
+  { date: '2026-12-02', start: '09:30', end: '12:00' },
+  { date: '2026-12-02', start: '13:00', end: '16:00' },
+  { date: '2026-12-07', start: '08:30', end: '12:00' },
+  { date: '2026-12-09', start: '09:30', end: '12:00' },
+  { date: '2026-12-10', start: '09:00', end: '12:00' },
+  { date: '2026-12-10', start: '13:00', end: '16:00' },
+  { date: '2026-12-15', start: '13:00', end: '15:00' },
+  { date: '2026-12-16', start: '08:30', end: '10:30' },
+]
 
-  return [
-    {
-      id: 'seed-mathe',
-      weekKey,
-      dayIndex: 0,
-      title: 'Mathe',
+function buildSeedEntries(): ScheduleEntry[] {
+  return rosaSeedSlots.map((slot, index) => {
+    const date = new Date(`${slot.date}T12:00:00`)
+    const weekStart = getMonday(date)
+    const dayIndex = (date.getDay() + 6) % 7
+
+    return {
+      id: `seed-rosa-${slot.date}-${slot.start}-${index}`,
+      weekKey: formatDateKey(weekStart),
+      dayIndex,
+      title: '<3',
       person: 'rosa',
-      start: '09:00',
-      end: '10:30',
-      note: 'A-102',
-    },
-    {
-      id: 'seed-programmierung',
-      weekKey,
-      dayIndex: 0,
-      title: 'Programmierung',
-      person: 'blau',
-      start: '09:30',
-      end: '11:00',
-      note: 'PC-Labor',
-    },
-    {
-      id: 'seed-physik',
-      weekKey,
-      dayIndex: 1,
-      title: 'Physik',
-      person: 'rosa',
-      start: '10:00',
-      end: '11:30',
-      note: 'Hörsaal 2',
-    },
-    {
-      id: 'seed-geschichte',
-      weekKey,
-      dayIndex: 2,
-      title: 'Geschichte',
-      person: 'blau',
-      start: '08:30',
-      end: '10:00',
-      note: 'Seminarraum',
-    },
-    {
-      id: 'seed-projekt',
-      weekKey,
-      dayIndex: 3,
-      title: 'Projektarbeit',
-      person: 'rosa',
-      start: '13:00',
-      end: '15:30',
-      note: 'Teammeeting',
-    },
-    {
-      id: 'seed-sport',
-      weekKey,
-      dayIndex: 4,
-      title: 'Sport',
-      person: 'blau',
-      start: '11:00',
-      end: '12:30',
-      note: 'Halle B',
-    },
-  ]
+      start: slot.start,
+      end: slot.end,
+      note: '',
+    }
+  })
 }
 
 const timeMarks = Array.from(
@@ -166,20 +154,6 @@ function parseTimeToMinutes(value: string) {
   return hours * 60 + minutes
 }
 
-function formatDuration(minutes: number) {
-  const hours = Math.floor(minutes / 60)
-  const rest = minutes % 60
-  if (rest === 0) {
-    return `${hours} Std.`
-  }
-
-  return `${hours} Std. ${rest} Min.`
-}
-
-function getEntryMinutes(entry: Pick<ScheduleEntry, 'start' | 'end'>) {
-  return parseTimeToMinutes(entry.end) - parseTimeToMinutes(entry.start)
-}
-
 function getDefaultDayIndex(referenceDate: Date, weekStart: Date) {
   const diffInDays = Math.floor(
     (new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate()).getTime() -
@@ -223,7 +197,7 @@ function App() {
   const now = new Date()
   const [weekOffset, setWeekOffset] = useState(0)
   const [entries, setEntries] = useState<ScheduleEntry[]>(() => {
-    const seededEntries = buildSeedEntries(currentWeekStart)
+    const seededEntries = buildSeedEntries()
 
     if (typeof window === 'undefined') {
       return seededEntries
@@ -265,8 +239,6 @@ function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
-  const importId = useId()
-  const importRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
@@ -282,15 +254,6 @@ function App() {
     return { label, date, dayIndex, items }
   })
 
-  const totals = (Object.keys(people) as PersonId[]).map((person) => {
-    const minutes = currentWeekEntries
-      .filter((entry) => entry.person === person)
-      .reduce((sum, entry) => sum + getEntryMinutes(entry), 0)
-
-    return { person, minutes }
-  })
-
-  const weekEnd = addDays(currentWeekStart, 4)
   const weekNumber = getIsoWeekNumber(currentWeekStart)
 
   function resetForm() {
@@ -369,103 +332,20 @@ function App() {
     }
   }
 
-  function handleClearWeek() {
-    setEntries((current) => current.filter((entry) => entry.weekKey !== currentWeekKey))
-    setSuccessMessage('Die aktuelle Woche wurde geleert.')
-
-    if (editingId) {
-      resetForm()
-    }
-  }
-
-  function handleExport() {
-    const blob = new Blob([JSON.stringify(entries, null, 2)], {
-      type: 'application/json',
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'wochenplan-backup.json'
-    link.click()
-    URL.revokeObjectURL(url)
-    setSuccessMessage('Backup exportiert.')
-  }
-
-  async function handleImport(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) {
-      return
-    }
-
-    try {
-      const raw = await file.text()
-      const parsed = JSON.parse(raw)
-      if (!Array.isArray(parsed)) {
-        throw new Error('Ungültiges Backup')
-      }
-
-      const importedEntries = parsed.filter((entry): entry is ScheduleEntry => {
-        return (
-          typeof entry?.id === 'string' &&
-          typeof entry?.weekKey === 'string' &&
-          typeof entry?.dayIndex === 'number' &&
-          typeof entry?.title === 'string' &&
-          (entry?.person === 'rosa' || entry?.person === 'blau') &&
-          typeof entry?.start === 'string' &&
-          typeof entry?.end === 'string' &&
-          typeof entry?.note === 'string'
-        )
-      })
-
-      setEntries(sortEntries(importedEntries))
-      setSuccessMessage('Backup importiert.')
-      setErrorMessage('')
-    } catch {
-      setErrorMessage('Das Backup konnte nicht gelesen werden.')
-    } finally {
-      event.target.value = ''
-    }
-  }
-
   return (
     <main className="app-shell">
-      <section className="hero-card">
-        <div className="eyebrow">Online-Wochenplan</div>
-        <div className="hero-grid">
-          <div>
-            <h1>Minimalistischer Planer fuer zwei Personen, direkt auf die aktuelle Woche gesetzt.</h1>
-            <p className="hero-copy">
-              Montag bis Freitag, farblich getrennt in Rosa und Blau, mit lokaler
-              Speicherung im Browser und klarer Eingabe fuer Zeiten und Termine.
-            </p>
-          </div>
-
-          <aside className="week-summary">
-            <p className="summary-label">Aktive Woche</p>
-            <strong>
-              KW {weekNumber} · {formatHeaderDate(currentWeekStart)} bis {formatHeaderDate(weekEnd)}
-            </strong>
-            <p>{currentWeekEntries.length} Eintraege gespeichert</p>
-
-            <div className="summary-people">
-              {totals.map(({ person, minutes }) => (
-                <div className={`summary-chip ${people[person].accent}`} key={person}>
-                  <span>{people[person].label}</span>
-                  <strong>{minutes === 0 ? 'Noch frei' : formatDuration(minutes)}</strong>
-                </div>
-              ))}
-            </div>
-          </aside>
+      <header className="app-header">
+        <div>
+          <p className="eyebrow">Rosa Planer</p>
+          <h1>Wochenübersicht</h1>
         </div>
-      </section>
 
-      <section className="toolbar-card">
         <div className="week-nav">
           <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value - 1)}>
             Vorige Woche
           </button>
           <div>
-            <p className="summary-label">Wochenansicht</p>
+            <p className="summary-label">Aktuell</p>
             <h2>
               KW {weekNumber} · {formatLongDate(currentWeekStart)}
             </h2>
@@ -474,31 +354,10 @@ function App() {
             Diese Woche
           </button>
           <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value + 1)}>
-            Naechste Woche
+            Nächste Woche
           </button>
         </div>
-
-        <div className="storage-actions">
-          <span className="storage-note">Gespeichert im Browser auf diesem Geraet</span>
-          <button type="button" className="ghost-button" onClick={handleExport}>
-            Backup exportieren
-          </button>
-          <button type="button" className="ghost-button" onClick={() => importRef.current?.click()}>
-            Backup importieren
-          </button>
-          <button type="button" className="ghost-button danger" onClick={handleClearWeek}>
-            Woche leeren
-          </button>
-          <input
-            id={importId}
-            ref={importRef}
-            type="file"
-            accept="application/json"
-            onChange={handleImport}
-            hidden
-          />
-        </div>
-      </section>
+      </header>
 
       <section className="workspace-grid">
         <article className="form-card">
