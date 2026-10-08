@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
+import { resolveDefaultWeekOffset } from './week-state'
 import './App.css'
 
 type PersonId = 'rosa' | 'blau'
@@ -294,20 +295,7 @@ function App() {
     }
   })
 
-  const [weekOffset, setWeekOffset] = useState(() => {
-    const weekKeys = [...new Set(entries.map((entry) => entry.weekKey))]
-
-    if (weekKeys.length === 0) {
-      return 0
-    }
-
-    const firstWeekKey = [...weekKeys].sort()[0]
-    const firstWeekDate = new Date(`${firstWeekKey}T00:00:00`)
-    const currentWeekDate = getMonday(now)
-    const differenceInDays = firstWeekDate.getTime() - currentWeekDate.getTime()
-
-    return Math.round(differenceInDays / 604800000)
-  })
+  const [weekOffset, setWeekOffset] = useState(() => resolveDefaultWeekOffset(entries, now))
 
   const currentWeekStart = addWeeks(getMonday(now), weekOffset)
   const currentWeekKey = formatDateKey(currentWeekStart)
@@ -349,7 +337,6 @@ function App() {
 
         <div className="planner-grid" aria-label="Wochenkalender">
           <div className="timeline-column" aria-hidden="true">
-            <div className="timeline-spacer">Zeit</div>
             {timeMarks.slice(0, -1).map((minutes) => (
               <div key={minutes} className="time-label">
                 {pad(Math.floor(minutes / 60))}:00

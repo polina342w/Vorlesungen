@@ -12,8 +12,8 @@
   border: 1px solid rgba(76, 63, 82, 0.08);
   border-radius: 28px;
   box-shadow: 0 24px 60px rgba(118, 90, 126, 0.10);
-  backdrop-filter: blur(12px);
   padding: 18px;
+  overflow: hidden;
 }
 
 .calendar-topbar {
@@ -83,30 +83,19 @@ h1 {
 
 .timeline-column {
   display: grid;
-  grid-template-rows: 30px repeat(14, minmax(36px, 1fr));
+  grid-template-rows: repeat(14, minmax(36px, 1fr));
   gap: 0;
-}
-
-.timeline-spacer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
-  color: var(--text-soft);
-  font-size: 0.64rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-bottom: 1px solid rgba(74, 63, 81, 0.08);
+  padding-top: 2px;
 }
 
 .time-label {
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding-top: 8px;
+  padding-top: 2px;
   padding-right: 8px;
-  font-size: 0.75rem;
-  color: var(--text-soft);
+  font-size: 0.72rem;
+  color: rgba(93, 77, 99, 0.8);
 }
 
 .planner-stage {
@@ -169,7 +158,8 @@ h1 {
 
 .grid-line {
   height: calc(100% / 28);
-  border-bottom: 1px solid rgba(74, 63, 81, 0.05);
+  border-bottom: 1px solid rgba(74, 63, 81, 0.09);
+  opacity: 0.7;
 }
 
 .entry-block {
@@ -305,13 +295,18 @@ h1 {
 
 @media (max-width: 820px) {
   .app-shell {
-    padding: 14px 12px 20px;
+    min-height: 100dvh;
+    padding: 0;
   }
 
   .calendar-shell {
     --calendar-height: 540px;
-    padding: 14px;
-    border-radius: 22px;
+    min-height: 100dvh;
+    padding: 14px 10px 12px;
+    border-radius: 0;
+    box-shadow: none;
+    border-left: none;
+    border-right: none;
   }
 
   .planner-grid {

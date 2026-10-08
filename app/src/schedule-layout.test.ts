@@ -21,12 +21,12 @@ test('overlapping entries split into parallel columns', () => {
     assert.equal(layout.c.width, 100)
 })
 
-test('defaults to the current or nearest week instead of the earliest future semester week', () => {
+test('defaults to the current or nearest available week instead of the earliest semester week', () => {
     const now = new Date('2026-10-08T12:00:00')
     const entries = [
         { weekKey: '2026-10-12', id: 'future', dayIndex: 0, title: '<3', person: 'rosa', start: '08:00', end: '09:00', note: '' },
         { weekKey: '2026-12-07', id: 'later', dayIndex: 0, title: '<3', person: 'blau', start: '09:00', end: '10:00', note: '' },
     ]
 
-    assert.equal(resolveDefaultWeekOffset(entries, now), 0)
+    assert.equal(resolveDefaultWeekOffset(entries, now), 1)
 })
