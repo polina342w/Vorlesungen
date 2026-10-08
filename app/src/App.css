@@ -239,10 +239,15 @@ h1 {
 }
 
 .entry-block strong {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
   font-size: 0.72rem;
   line-height: 1.15;
   color: rgba(30, 32, 36, 0.95);
-  white-space: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .entry-time,
@@ -532,12 +537,15 @@ body.modal-open {
   }
 
   .planner-grid {
-    display: none;
+    display: grid;
+    grid-template-columns: 58px minmax(720px, 1fr);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-days {
-    display: grid;
-    gap: 12px;
+    display: none;
   }
 
   .week-nav {
