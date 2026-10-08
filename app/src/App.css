@@ -231,7 +231,7 @@ h1 {
 }
 
 .entry-block.rose {
-  background: #f8cbdc;
+  background: rgba(248, 203, 220, 0.8);
 }
 
 .entry-block.blue {
