@@ -433,6 +433,8 @@ function App() {
                       const height = ((endMinutes - startMinutes) / totalRange) * 100
                       const layout = buildDayLayout(items)
                       const box = layout[entry.id] ?? { left: 0, width: 100 }
+                      const hideShortHeartContent =
+                        entry.title.trim() === '<3' && endMinutes - startMinutes <= SLOT_MINUTES
 
                       return (
                         <button
@@ -449,14 +451,18 @@ function App() {
                             right: 'auto',
                           }}
                         >
-                          <span className="entry-time">
-                            {entry.start}–{entry.end}
-                          </span>
-                          <strong>{entry.title}</strong>
-                          <div className="entry-footer">
-                            <small>{people[entry.person].label}</small>
-                            {entry.note ? <small>{entry.note}</small> : null}
-                          </div>
+                          {hideShortHeartContent ? null : (
+                            <>
+                              <span className="entry-time">
+                                {entry.start}–{entry.end}
+                              </span>
+                              <strong>{entry.title}</strong>
+                              <div className="entry-footer">
+                                <small>{people[entry.person].label}</small>
+                                {entry.note ? <small>{entry.note}</small> : null}
+                              </div>
+                            </>
+                          )}
                         </button>
                       )
                     })}
