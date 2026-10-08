@@ -116,7 +116,7 @@ h1 {
 
 .days-header-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
   gap: 8px;
 }
 
@@ -149,7 +149,7 @@ h1 {
 
 .days-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
   gap: 8px;
 }
 
@@ -306,16 +306,12 @@ h1 {
 
   .planner-grid {
     display: grid;
-    grid-template-columns: 48px minmax(540px, 1fr);
+    grid-template-columns: 44px minmax(720px, 1fr);
+    overflow-x: auto;
   }
 
   .mobile-days {
     display: none;
-  }
-
-  .mobile-day-card {
-    padding: 12px;
-    border-radius: 16px;
   }
 
   .week-nav {
