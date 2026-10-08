@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
 import { resolveDefaultWeekOffset } from './week-state'
 import './App.css'
@@ -18,7 +18,7 @@ type ScheduleEntry = {
 
 const STORAGE_KEY = 'vorlesungen-wochenplan-v1'
 const DAY_START_HOUR = 7
-const DAY_END_HOUR = 21
+const DAY_END_HOUR = 19
 const SLOT_MINUTES = 30
 
 const people: Record<PersonId, { label: string; accent: string }> = {
@@ -296,6 +296,7 @@ function App() {
   })
 
   const [weekOffset, setWeekOffset] = useState(() => resolveDefaultWeekOffset(entries, now))
+  const [selectedEntry, setSelectedEntry] = useState<ScheduleEntry | null>(null)
 
   const currentWeekStart = addWeeks(getMonday(now), weekOffset)
   const currentWeekKey = formatDateKey(currentWeekStart)
@@ -311,6 +312,30 @@ function App() {
   })
 
   const weekNumber = getIsoWeekNumber(currentWeekStart)
+
+  useEffect(() => {
+    if (!selectedEntry) {
+      return
+    }
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedEntry(null)
+      }
+    }
+
+    document.addEventListener('keydown', closeOnEscape)
+    document.body.classList.add('modal-open')
+
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape)
+      document.body.classList.remove('modal-open')
+    }
+  }, [selectedEntry])
+
+  const selectedDate = selectedEntry
+    ? addDays(currentWeekStart, selectedEntry.dayIndex)
+    : null
 
   return (
     <main className="app-shell">
@@ -337,11 +362,19 @@ function App() {
 
         <div className="planner-grid" aria-label="Wochenkalender">
           <div className="timeline-column" aria-hidden="true">
-            {timeMarks.slice(0, -1).map((minutes) => (
-              <div key={minutes} className="time-label">
-                {pad(Math.floor(minutes / 60))}:00
-              </div>
-            ))}
+            <div className="calendar-corner">KW {weekNumber}</div>
+            <div className="time-scale">
+              {timeMarks.filter((minutes) => minutes % 60 === 0).map((minutes) => {
+                const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
+                const top = ((minutes - DAY_START_HOUR * 60) / totalRange) * 100
+
+                return (
+                  <div key={minutes} className="time-label" style={{ top: `${top}%` }}>
+                    {pad(Math.floor(minutes / 60))}:00
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           <div className="planner-stage">
@@ -358,9 +391,18 @@ function App() {
               {weekDays.map(({ label, items }) => (
                 <section key={label} className="day-column">
                   <div className="day-surface">
-                    {timeMarks.slice(0, -1).map((minutes) => (
-                      <div key={`${label}-${minutes}`} className="grid-line" />
-                    ))}
+                    {timeMarks.map((minutes) => {
+                      const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
+                      const top = ((minutes - DAY_START_HOUR * 60) / totalRange) * 100
+
+                      return (
+                        <div
+                          key={`${label}-${minutes}`}
+                          className={`grid-line ${minutes % 60 === 0 ? 'hour-line' : ''}`}
+                          style={{ top: `${top}%` }}
+                        />
+                      )
+                    })}
 
                     {items.map((entry) => {
                       const startMinutes = parseTimeToMinutes(entry.start)
@@ -372,9 +414,12 @@ function App() {
                       const box = layout[entry.id] ?? { left: 0, width: 100 }
 
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={entry.id}
                           className={`entry-block ${people[entry.person].accent}`}
+                          onClick={() => setSelectedEntry(entry)}
+                          aria-label={`${entry.title}, ${entry.start} bis ${entry.end}. Details öffnen`}
                           style={{
                             top: `${top}%`,
                             height: `${height}%`,
@@ -383,14 +428,15 @@ function App() {
                             right: 'auto',
                           }}
                         >
+                          <span className="entry-time">
+                            {entry.start}–{entry.end}
+                          </span>
                           <strong>{entry.title}</strong>
                           <div className="entry-footer">
-                            <span className="entry-time">
-                              {entry.start} - {entry.end}
-                            </span>
+                            <small>{people[entry.person].label}</small>
                             {entry.note ? <small>{entry.note}</small> : null}
                           </div>
-                        </div>
+                        </button>
                       )
                     })}
                   </div>
@@ -411,19 +457,56 @@ function App() {
               {items.length === 0 ? <p className="mobile-empty">Noch kein Eintrag.</p> : null}
 
               {items.map((entry) => (
-                <div key={`${entry.id}-mobile`} className={`mobile-entry ${people[entry.person].accent}`}>
+                <button
+                  type="button"
+                  key={`${entry.id}-mobile`}
+                  className={`mobile-entry ${people[entry.person].accent}`}
+                  onClick={() => setSelectedEntry(entry)}
+                >
                   <div className="mobile-entry-copy">
                     <span className="mobile-person-tag">{people[entry.person].label}</span>
                     <p>{entry.start} - {entry.end}</p>
                     <strong>{entry.title}</strong>
                     {entry.note ? <span>{entry.note}</span> : null}
                   </div>
-                </div>
+                </button>
               ))}
             </section>
           ))}
         </div>
       </section>
+
+      {selectedEntry && selectedDate ? (
+        <div className="modal-backdrop" role="presentation" onMouseDown={() => setSelectedEntry(null)}>
+          <section
+            className="lecture-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="lecture-modal-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setSelectedEntry(null)}
+              aria-label="Popup schließen"
+              autoFocus
+            >
+              ×
+            </button>
+            <span className={`modal-person ${people[selectedEntry.person].accent}`}>
+              {people[selectedEntry.person].label}
+            </span>
+            <h2 id="lecture-modal-title">{selectedEntry.title}</h2>
+            <p className="modal-date">{formatLongDate(selectedDate)}</p>
+            <div className="modal-time-card">
+              <span>Uhrzeit</span>
+              <strong>{selectedEntry.start} – {selectedEntry.end} Uhr</strong>
+            </div>
+            {selectedEntry.note ? <p className="modal-note">{selectedEntry.note}</p> : null}
+          </section>
+        </div>
+      ) : null}
     </main>
   )
 }
