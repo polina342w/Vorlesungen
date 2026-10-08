@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
 import { resolveSeedEntryTitle } from './lecture-names'
 import './App.css'
@@ -289,6 +289,8 @@ function mergeWithSeedEntries(storedEntries: ScheduleEntry[], seededEntries: Sch
 
 function App() {
   const now = new Date()
+  const plannerGridRef = useRef<HTMLDivElement>(null)
+  const plannerStageRef = useRef<HTMLDivElement>(null)
   const seededEntries = buildSeedEntries()
   const [entries] = useState<ScheduleEntry[]>(() => {
     if (typeof window === 'undefined') {
@@ -363,6 +365,27 @@ function App() {
     }
   }, [selectedEntry])
 
+  useEffect(() => {
+    const plannerGrid = plannerGridRef.current
+    const plannerStage = plannerStageRef.current
+
+    if (!plannerGrid || !plannerStage || !window.matchMedia('(max-width: 820px)').matches) {
+      return
+    }
+
+    const visibleDayIndex = weekOffset === 0 ? (new Date().getDay() + 6) % 7 : 0
+    const dayIndex = Math.min(visibleDayIndex, weekdayLabels.length - 1)
+    const timelineWidth = plannerGrid.firstElementChild?.getBoundingClientRect().width ?? 58
+    const dayWidth = plannerStage.getBoundingClientRect().width / weekdayLabels.length
+    const calendarViewportWidth = plannerGrid.clientWidth - timelineWidth
+    const centeredDayOffset = Math.max(0, (calendarViewportWidth - dayWidth) / 2)
+
+    plannerGrid.scrollLeft = Math.max(
+      0,
+      timelineWidth + dayIndex * dayWidth - centeredDayOffset,
+    )
+  }, [weekOffset])
+
   const selectedDate = selectedEntry
     ? addDays(currentWeekStart, selectedEntry.dayIndex)
     : null
@@ -397,7 +420,7 @@ function App() {
           </div>
         </div>
 
-        <div className="planner-grid" aria-label="Wochenkalender">
+        <div ref={plannerGridRef} className="planner-grid" aria-label="Wochenkalender">
           <div className="timeline-column" aria-hidden="true">
             <div className="calendar-corner">KW {weekNumber}</div>
             <div className="time-scale">
@@ -414,7 +437,7 @@ function App() {
             </div>
           </div>
 
-          <div className="planner-stage">
+          <div ref={plannerStageRef} className="planner-stage">
             <div className="days-header-row">
               {weekDays.map(({ label, date }) => (
                 <div key={`${label}-header`} className="day-pill">
