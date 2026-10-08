@@ -383,7 +383,6 @@ function App() {
                             right: 'auto',
                           }}
                         >
-                          <span className="entry-person">{people[entry.person].label}</span>
                           <strong>{entry.title}</strong>
                           <div className="entry-footer">
                             <span className="entry-time">
