@@ -151,6 +151,18 @@ const blueSeedSlots = [
   { date: '2026-12-17', start: '11:00', end: '13:00', title: 'GL des SWE' },
 ]
 
+const currentWeekSeedSlots: Array<{
+  date: string
+  start: string
+  end: string
+  title: string
+  person: PersonId
+}> = [
+  { date: '2026-10-08', start: '13:00', end: '16:00', title: 'IT-Sicherheit', person: 'rosa' },
+  { date: '2026-10-08', start: '13:00', end: '14:30', title: 'Form. Sp+Autom. 1+2', person: 'blau' },
+  { date: '2026-10-08', start: '15:30', end: '18:45', title: 'C/C++', person: 'blau' },
+]
+
 function buildSeedEntries(): ScheduleEntry[] {
   const createEntry = (
     slot: { date: string; start: string; end: string; title?: string },
@@ -179,6 +191,7 @@ function buildSeedEntries(): ScheduleEntry[] {
   return [
     ...rosaSeedSlots.map((slot, index) => createEntry(slot, 'rosa', index)),
     ...blueSeedSlots.map((slot, index) => createEntry(slot, 'blau', index)),
+    ...currentWeekSeedSlots.map((slot, index) => createEntry(slot, slot.person, index)),
   ]
 }
 
