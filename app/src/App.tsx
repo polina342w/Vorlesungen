@@ -222,139 +222,117 @@ function App() {
 
   return (
     <main className="app-shell">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">Rosa Planer</p>
-          <h1>Wochenübersicht</h1>
-        </div>
+      <section className="calendar-shell">
+        <div className="calendar-topbar">
+          <h1>Kalender</h1>
 
-        <div className="week-nav">
-          <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value - 1)}>
-            Vorige Woche
-          </button>
-          <div>
-            <p className="summary-label">Aktuell</p>
-            <h2>
-              KW {weekNumber} · {formatLongDate(currentWeekStart)}
-            </h2>
-          </div>
-          <button type="button" className="ghost-button" onClick={() => setWeekOffset(0)}>
-            Diese Woche
-          </button>
-          <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value + 1)}>
-            Nächste Woche
-          </button>
-        </div>
-      </header>
-
-      <section className="workspace-grid single-column">
-        <article className="planner-card">
-          <div className="card-heading">
-            <div>
-              <p className="summary-label">Kalender</p>
-              <h3>Montag bis Freitag</h3>
+          <div className="week-nav">
+            <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value - 1)}>
+              Vorige Woche
+            </button>
+            <div className="week-label">
+              <span>KW {weekNumber}</span>
+              <strong>{formatLongDate(currentWeekStart)}</strong>
             </div>
-            <span className="mobile-hint">Kompakt fuer iPhone und Desktop</span>
+            <button type="button" className="ghost-button" onClick={() => setWeekOffset(0)}>
+              Diese Woche
+            </button>
+            <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value + 1)}>
+              Nächste Woche
+            </button>
+          </div>
+        </div>
+
+        <div className="planner-grid" aria-label="Wochenkalender">
+          <div className="timeline-column" aria-hidden="true">
+            <div className="timeline-spacer">Zeit</div>
+            {timeMarks.slice(0, -1).map((minutes) => (
+              <div key={minutes} className="time-label">
+                {pad(Math.floor(minutes / 60))}:00
+              </div>
+            ))}
           </div>
 
-          <div className="planner-grid" aria-label="Wochenkalender">
-            <div className="timeline-column" aria-hidden="true">
-              <div className="timeline-spacer">Zeit</div>
-              {timeMarks.slice(0, -1).map((minutes) => (
-                <div key={minutes} className="time-label">
-                  {pad(Math.floor(minutes / 60))}:00
+          <div className="planner-stage">
+            <div className="days-header-row">
+              {weekDays.map(({ label, date }) => (
+                <div key={`${label}-header`} className="day-pill">
+                  <strong>{label.slice(0, 2)}</strong>
+                  <span>{formatHeaderDate(date)}</span>
                 </div>
               ))}
             </div>
 
-            <div className="planner-stage">
-              <div className="days-header-row">
-                {weekDays.map(({ label, date }) => (
-                  <div key={`${label}-header`} className="day-pill">
-                    <strong>{label.slice(0, 2)}</strong>
-                    <span>{formatHeaderDate(date)}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="days-grid">
+              {weekDays.map(({ label, items }) => (
+                <section key={label} className="day-column">
+                  <div className="day-surface">
+                    {timeMarks.slice(0, -1).map((minutes) => (
+                      <div key={`${label}-${minutes}`} className="grid-line" />
+                    ))}
 
-              <div className="days-grid">
-                {weekDays.map(({ label, date, items }) => (
-                  <section key={label} className="day-column">
-                    <div className="day-surface">
-                      <div className="day-surface-label" aria-hidden="true">
-                        <span>{label}</span>
-                        <strong>{formatHeaderDate(date)}</strong>
-                      </div>
+                    {items.map((entry) => {
+                      const startMinutes = parseTimeToMinutes(entry.start)
+                      const endMinutes = parseTimeToMinutes(entry.end)
+                      const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
+                      const top = ((startMinutes - DAY_START_HOUR * 60) / totalRange) * 100
+                      const height = ((endMinutes - startMinutes) / totalRange) * 100
+                      const layout = buildDayLayout(items)
+                      const box = layout[entry.id] ?? { left: 0, width: 100 }
 
-                      {timeMarks.slice(0, -1).map((minutes) => (
-                        <div key={`${label}-${minutes}`} className="grid-line" />
-                      ))}
-
-                      {items.map((entry) => {
-                        const startMinutes = parseTimeToMinutes(entry.start)
-                        const endMinutes = parseTimeToMinutes(entry.end)
-                        const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
-                        const top = ((startMinutes - DAY_START_HOUR * 60) / totalRange) * 100
-                        const height = ((endMinutes - startMinutes) / totalRange) * 100
-                        const layout = buildDayLayout(items)
-                        const box = layout[entry.id] ?? { left: 0, width: 100 }
-
-                        return (
-                          <div
-                            key={entry.id}
-                            className={`entry-block ${people[entry.person].accent}`}
-                            style={{
-                              top: `${top}%`,
-                              height: `${height}%`,
-                              left: `${box.left}%`,
-                              width: `${box.width}%`,
-                              right: 'auto',
-                            }}
-                          >
-                            <span className="entry-person">{people[entry.person].label}</span>
-                            <strong>{entry.title}</strong>
-                            <div className="entry-footer">
-                              <span className="entry-time">
-                                {entry.start} - {entry.end}
-                              </span>
-                              {entry.note ? <small>{entry.note}</small> : null}
-                            </div>
+                      return (
+                        <div
+                          key={entry.id}
+                          className={`entry-block ${people[entry.person].accent}`}
+                          style={{
+                            top: `${top}%`,
+                            height: `${height}%`,
+                            left: `${box.left}%`,
+                            width: `${box.width}%`,
+                            right: 'auto',
+                          }}
+                        >
+                          <span className="entry-person">{people[entry.person].label}</span>
+                          <strong>{entry.title}</strong>
+                          <div className="entry-footer">
+                            <span className="entry-time">
+                              {entry.start} - {entry.end}
+                            </span>
+                            {entry.note ? <small>{entry.note}</small> : null}
                           </div>
-                        )
-                      })}
-                    </div>
-                  </section>
-                ))}
-              </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
           </div>
+        </div>
 
-          <div className="mobile-days">
-            {weekDays.map(({ label, date, items }) => (
-              <section key={`${label}-mobile`} className="mobile-day-card">
-                <header>
-                  <strong>{label}</strong>
-                  <span>{formatHeaderDate(date)}</span>
-                </header>
+        <div className="mobile-days">
+          {weekDays.map(({ label, items, date }) => (
+            <section key={`${label}-mobile`} className="mobile-day-card">
+              <header>
+                <strong>{label}</strong>
+                <span>{formatHeaderDate(date)}</span>
+              </header>
 
-                {items.length === 0 ? <p className="mobile-empty">Noch kein Eintrag.</p> : null}
+              {items.length === 0 ? <p className="mobile-empty">Noch kein Eintrag.</p> : null}
 
-                {items.map((entry) => (
-                  <div key={`${entry.id}-mobile`} className={`mobile-entry ${people[entry.person].accent}`}>
-                    <div className="mobile-entry-copy">
-                      <span className="mobile-person-tag">{people[entry.person].label}</span>
-                      <p>
-                        {entry.start} - {entry.end}
-                      </p>
-                      <strong>{entry.title}</strong>
-                      {entry.note ? <span>{entry.note}</span> : null}
-                    </div>
+              {items.map((entry) => (
+                <div key={`${entry.id}-mobile`} className={`mobile-entry ${people[entry.person].accent}`}>
+                  <div className="mobile-entry-copy">
+                    <span className="mobile-person-tag">{people[entry.person].label}</span>
+                    <p>{entry.start} - {entry.end}</p>
+                    <strong>{entry.title}</strong>
+                    {entry.note ? <span>{entry.note}</span> : null}
                   </div>
-                ))}
-              </section>
-            ))}
-          </div>
-        </article>
+                </div>
+              ))}
+            </section>
+          ))}
+        </div>
       </section>
     </main>
   )
