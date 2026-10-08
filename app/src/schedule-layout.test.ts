@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import { buildDayLayout } from './schedule-layout'
 import { resolveDefaultWeekOffset } from './week-state'
+import { resolveSeedEntryTitle } from './lecture-names'
 
 test('overlapping entries split into parallel columns', () => {
     const entries = [
@@ -29,4 +30,12 @@ test('defaults to the current or nearest available week instead of the earliest 
     ]
 
     assert.equal(resolveDefaultWeekOffset(entries, now), 1)
+})
+
+test('uses the exact lecture names for known seeded dates and times', () => {
+    assert.equal(resolveSeedEntryTitle('2026-10-19', '08:30', '12:00'), 'GL K. Intelligenz')
+    assert.equal(resolveSeedEntryTitle('2026-10-21', '09:30', '12:00'), 'GL M. Lernverfahren')
+    assert.equal(resolveSeedEntryTitle('2026-10-22', '13:00', '16:00'), 'IT-Sicherheit')
+    assert.equal(resolveSeedEntryTitle('2026-12-16', '08:30', '09:30'), 'GL K. Intelligenz')
+    assert.equal(resolveSeedEntryTitle('2026-12-16', '09:30', '10:30'), 'GL M. Lernverfahren')
 })

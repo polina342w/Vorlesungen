@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
+import { resolveSeedEntryTitle } from './lecture-names'
 import './App.css'
 
 type PersonId = 'rosa' | 'blau'
@@ -164,7 +165,10 @@ function buildSeedEntries(): ScheduleEntry[] {
       id: `seed-${person}-${slot.date}-${slot.start}-${index}`,
       weekKey: formatDateKey(weekStart),
       dayIndex,
-      title: slot.title ?? (person === 'rosa' ? '<3' : 'Termin'),
+      title:
+        slot.title ??
+        resolveSeedEntryTitle(slot.date, slot.start, slot.end) ??
+        (person === 'rosa' ? '<3' : 'Termin'),
       person,
       start: slot.start,
       end: slot.end,
