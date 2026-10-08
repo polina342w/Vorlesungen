@@ -457,10 +457,11 @@ function App() {
                                 {entry.start}–{entry.end}
                               </span>
                               <strong>{entry.title}</strong>
-                              <div className="entry-footer">
-                                <small>{people[entry.person].label}</small>
-                                {entry.note ? <small>{entry.note}</small> : null}
-                              </div>
+                              {entry.note ? (
+                                <div className="entry-footer">
+                                  <small>{entry.note}</small>
+                                </div>
+                              ) : null}
                             </>
                           )}
                         </button>
