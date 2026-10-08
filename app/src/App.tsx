@@ -394,10 +394,7 @@ function App() {
     <main className="app-shell">
       <section className="calendar-shell">
         <div className="calendar-topbar">
-          <div className="calendar-brand">
-            <img src="./favicon.svg" alt="" />
-            <h1>Kalender</h1>
-          </div>
+          <h1>Kalender</h1>
 
           <div className="week-nav">
             <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value - 1)}>
