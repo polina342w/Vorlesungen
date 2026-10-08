@@ -305,12 +305,12 @@ h1 {
   }
 
   .planner-grid {
-    display: none;
+    display: grid;
+    grid-template-columns: 48px minmax(540px, 1fr);
   }
 
   .mobile-days {
-    display: grid;
-    gap: 10px;
+    display: none;
   }
 
   .mobile-day-card {
