@@ -63,23 +63,115 @@ const rosaSeedSlots = [
   { date: '2026-12-16', start: '08:30', end: '10:30' },
 ]
 
+const blueSeedSlots = [
+  { date: '2026-10-12', start: '08:15', end: '12:15' },
+  { date: '2026-10-13', start: '16:00', end: '19:00' },
+  { date: '2026-10-14', start: '11:00', end: '12:30' },
+  { date: '2026-10-14', start: '13:00', end: '14:30' },
+  { date: '2026-10-15', start: '09:00', end: '12:15' },
+  { date: '2026-10-15', start: '13:00', end: '14:30' },
+  { date: '2026-10-15', start: '15:30', end: '18:45' },
+  { date: '2026-10-16', start: '09:00', end: '12:00' },
+  { date: '2026-10-16', start: '12:30', end: '14:00' },
+  { date: '2026-10-19', start: '08:15', end: '12:15' },
+  { date: '2026-10-20', start: '09:00', end: '12:00' },
+  { date: '2026-10-20', start: '13:00', end: '16:00' },
+  { date: '2026-10-20', start: '16:00', end: '19:00' },
+  { date: '2026-10-21', start: '11:00', end: '12:30' },
+  { date: '2026-10-21', start: '12:45', end: '14:15' },
+  { date: '2026-10-22', start: '09:00', end: '12:15' },
+  { date: '2026-10-22', start: '13:00', end: '14:30' },
+  { date: '2026-10-22', start: '15:30', end: '18:45' },
+  { date: '2026-10-26', start: '08:15', end: '12:15' },
+  { date: '2026-10-27', start: '09:00', end: '12:00' },
+  { date: '2026-10-27', start: '13:00', end: '16:00' },
+  { date: '2026-10-27', start: '16:00', end: '19:00' },
+  { date: '2026-10-28', start: '11:00', end: '12:30' },
+  { date: '2026-10-28', start: '12:45', end: '14:15' },
+  { date: '2026-10-29', start: '09:00', end: '12:15' },
+  { date: '2026-10-29', start: '13:00', end: '14:30' },
+  { date: '2026-10-29', start: '15:30', end: '18:45' },
+  { date: '2026-11-02', start: '08:15', end: '12:15' },
+  { date: '2026-11-03', start: '09:00', end: '12:00' },
+  { date: '2026-11-03', start: '13:00', end: '16:00' },
+  { date: '2026-11-03', start: '16:00', end: '19:00' },
+  { date: '2026-11-04', start: '11:00', end: '12:30' },
+  { date: '2026-11-04', start: '12:45', end: '14:15' },
+  { date: '2026-11-05', start: '09:00', end: '12:15' },
+  { date: '2026-11-05', start: '13:00', end: '14:30' },
+  { date: '2026-11-05', start: '15:30', end: '18:45' },
+  { date: '2026-11-09', start: '08:15', end: '12:15' },
+  { date: '2026-11-10', start: '09:00', end: '12:00' },
+  { date: '2026-11-10', start: '13:00', end: '16:00' },
+  { date: '2026-11-10', start: '16:00', end: '19:00' },
+  { date: '2026-11-11', start: '11:00', end: '12:30' },
+  { date: '2026-11-11', start: '12:45', end: '14:15' },
+  { date: '2026-11-12', start: '09:00', end: '12:15' },
+  { date: '2026-11-12', start: '13:00', end: '14:30' },
+  { date: '2026-11-12', start: '15:30', end: '18:45' },
+  { date: '2026-11-17', start: '09:00', end: '12:00' },
+  { date: '2026-11-17', start: '13:00', end: '16:00' },
+  { date: '2026-11-17', start: '16:00', end: '19:00' },
+  { date: '2026-11-18', start: '11:00', end: '12:30' },
+  { date: '2026-11-18', start: '13:00', end: '14:30' },
+  { date: '2026-11-18', start: '15:00', end: '16:30' },
+  { date: '2026-11-19', start: '09:00', end: '12:15' },
+  { date: '2026-11-19', start: '13:00', end: '14:30' },
+  { date: '2026-11-19', start: '15:30', end: '18:45' },
+  { date: '2026-11-23', start: '08:30', end: '10:00' },
+  { date: '2026-11-23', start: '10:00', end: '10:30' },
+  { date: '2026-11-24', start: '09:00', end: '12:00' },
+  { date: '2026-11-24', start: '13:00', end: '16:00' },
+  { date: '2026-11-24', start: '16:00', end: '19:00' },
+  { date: '2026-11-25', start: '11:00', end: '12:30' },
+  { date: '2026-11-25', start: '12:45', end: '14:15' },
+  { date: '2026-11-26', start: '09:00', end: '12:15' },
+  { date: '2026-11-26', start: '13:00', end: '14:30' },
+  { date: '2026-11-26', start: '15:30', end: '18:45' },
+  { date: '2026-11-30', start: '09:00', end: '12:15' },
+  { date: '2026-12-01', start: '09:00', end: '12:00' },
+  { date: '2026-12-01', start: '13:00', end: '16:00' },
+  { date: '2026-12-01', start: '16:00', end: '19:00' },
+  { date: '2026-12-02', start: '11:00', end: '12:30' },
+  { date: '2026-12-02', start: '12:45', end: '14:15' },
+  { date: '2026-12-03', start: '13:00', end: '14:30' },
+  { date: '2026-12-03', start: '15:30', end: '18:45' },
+  { date: '2026-12-08', start: '09:00', end: '12:00' },
+  { date: '2026-12-08', start: '13:00', end: '16:00' },
+  { date: '2026-12-08', start: '16:00', end: '19:00' },
+  { date: '2026-12-09', start: '11:00', end: '12:30' },
+  { date: '2026-12-09', start: '12:45', end: '14:15' },
+  { date: '2026-12-10', start: '09:00', end: '12:15' },
+  { date: '2026-12-10', start: '13:00', end: '14:30' },
+  { date: '2026-12-10', start: '15:30', end: '18:45' },
+  { date: '2026-12-14', start: '11:00', end: '12:00' },
+  { date: '2026-12-15', start: '10:30', end: '12:30' },
+  { date: '2026-12-16', start: '11:00', end: '13:00' },
+  { date: '2026-12-17', start: '11:00', end: '13:00' },
+]
+
 function buildSeedEntries(): ScheduleEntry[] {
-  return rosaSeedSlots.map((slot, index) => {
+  const createEntry = (slot: { date: string; start: string; end: string }, person: PersonId, index: number): ScheduleEntry => {
     const date = new Date(`${slot.date}T12:00:00`)
     const weekStart = getMonday(date)
     const dayIndex = (date.getDay() + 6) % 7
 
     return {
-      id: `seed-rosa-${slot.date}-${slot.start}-${index}`,
+      id: `seed-${person}-${slot.date}-${slot.start}-${index}`,
       weekKey: formatDateKey(weekStart),
       dayIndex,
       title: '<3',
-      person: 'rosa',
+      person,
       start: slot.start,
       end: slot.end,
       note: '',
     }
-  })
+  }
+
+  return [
+    ...rosaSeedSlots.map((slot, index) => createEntry(slot, 'rosa', index)),
+    ...blueSeedSlots.map((slot, index) => createEntry(slot, 'blau', index)),
+  ]
 }
 
 const timeMarks = Array.from(
@@ -151,7 +243,16 @@ function sortEntries(entries: ScheduleEntry[]) {
       return left.dayIndex - right.dayIndex
     }
 
-    return parseTimeToMinutes(left.start) - parseTimeToMinutes(right.start)
+    const startDiff = parseTimeToMinutes(left.start) - parseTimeToMinutes(right.start)
+    if (startDiff !== 0) {
+      return startDiff
+    }
+
+    if (left.person !== right.person) {
+      return left.person === 'blau' ? -1 : 1
+    }
+
+    return left.title.localeCompare(right.title)
   })
 }
 
@@ -193,17 +294,7 @@ function App() {
     }
   })
 
-  const [weekOffset, setWeekOffset] = useState(() => {
-    const sourceEntries = entries.length > 0 ? entries : seededEntries
-    const earliestWeek = sourceEntries.reduce((smallest, entry) => {
-      return entry.weekKey < smallest ? entry.weekKey : smallest
-    }, sourceEntries[0]?.weekKey ?? formatDateKey(getMonday(now)))
-
-    const earliestWeekDate = new Date(`${earliestWeek}T00:00:00`)
-    const currentWeekDate = getMonday(now)
-    const differenceInDays = earliestWeekDate.getTime() - currentWeekDate.getTime()
-    return Math.round(differenceInDays / 604800000)
-  })
+  const [weekOffset, setWeekOffset] = useState(0)
 
   const currentWeekStart = addWeeks(getMonday(now), weekOffset)
   const currentWeekKey = formatDateKey(currentWeekStart)
