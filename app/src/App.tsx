@@ -257,6 +257,16 @@ function sortEntries(entries: ScheduleEntry[]) {
   })
 }
 
+function mergeWithSeedEntries(storedEntries: ScheduleEntry[], seededEntries: ScheduleEntry[]) {
+  const mergedEntries = new Map(seededEntries.map((entry) => [entry.id, entry]))
+
+  storedEntries.forEach((entry) => {
+    mergedEntries.set(entry.id, entry)
+  })
+
+  return [...mergedEntries.values()]
+}
+
 function App() {
   const now = new Date()
   const seededEntries = buildSeedEntries()
@@ -289,7 +299,7 @@ function App() {
         )
       })
 
-      return validEntries.length > 0 ? validEntries : seededEntries
+      return mergeWithSeedEntries(validEntries, seededEntries)
     } catch {
       return seededEntries
     }
@@ -351,8 +361,12 @@ function App() {
               <span>KW {weekNumber}</span>
               <strong>{formatLongDate(currentWeekStart)}</strong>
             </div>
-            <button type="button" className="ghost-button" onClick={() => setWeekOffset(0)}>
-              Diese Woche
+            <button
+              type="button"
+              className="ghost-button"
+              onClick={() => setWeekOffset(resolveDefaultWeekOffset(entries, new Date()))}
+            >
+              Aktuelle Planwoche
             </button>
             <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value + 1)}>
               Nächste Woche
