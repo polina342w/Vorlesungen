@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
-import { resolveDefaultWeekOffset } from './week-state'
 import './App.css'
 
 type PersonId = 'rosa' | 'blau'
@@ -305,7 +304,7 @@ function App() {
     }
   })
 
-  const [weekOffset, setWeekOffset] = useState(() => resolveDefaultWeekOffset(entries, now))
+  const [weekOffset, setWeekOffset] = useState(0)
   const [selectedEntry, setSelectedEntry] = useState<ScheduleEntry | null>(null)
 
   const currentWeekStart = addWeeks(getMonday(now), weekOffset)
@@ -364,9 +363,9 @@ function App() {
             <button
               type="button"
               className="ghost-button"
-              onClick={() => setWeekOffset(resolveDefaultWeekOffset(entries, new Date()))}
+              onClick={() => setWeekOffset(0)}
             >
-              Aktuelle Planwoche
+              Diese Woche
             </button>
             <button type="button" className="ghost-button" onClick={() => setWeekOffset((value) => value + 1)}>
               Nächste Woche
