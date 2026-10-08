@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { buildDayLayout } from './schedule-layout'
 import './App.css'
 
@@ -9,15 +9,6 @@ type ScheduleEntry = {
   weekKey: string
   dayIndex: number
   title: string
-  person: PersonId
-  start: string
-  end: string
-  note: string
-}
-
-type FormState = {
-  title: string
-  dayIndex: number
   person: PersonId
   start: string
   end: string
@@ -154,35 +145,6 @@ function parseTimeToMinutes(value: string) {
   return hours * 60 + minutes
 }
 
-function getDefaultDayIndex(referenceDate: Date, weekStart: Date) {
-  const diffInDays = Math.floor(
-    (new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate()).getTime() -
-      weekStart.getTime()) /
-    86400000,
-  )
-
-  if (diffInDays < 0) {
-    return 0
-  }
-
-  if (diffInDays > 4) {
-    return 4
-  }
-
-  return diffInDays
-}
-
-function createFormState(referenceDate: Date, weekStart: Date): FormState {
-  return {
-    title: '',
-    dayIndex: getDefaultDayIndex(referenceDate, weekStart),
-    person: 'rosa',
-    start: '09:00',
-    end: '10:30',
-    note: '',
-  }
-}
-
 function sortEntries(entries: ScheduleEntry[]) {
   return [...entries].sort((left, right) => {
     if (left.dayIndex !== right.dayIndex) {
@@ -195,10 +157,8 @@ function sortEntries(entries: ScheduleEntry[]) {
 
 function App() {
   const now = new Date()
-  const [weekOffset, setWeekOffset] = useState(0)
-  const [entries, setEntries] = useState<ScheduleEntry[]>(() => {
-    const seededEntries = buildSeedEntries()
-
+  const seededEntries = buildSeedEntries()
+  const [entries] = useState<ScheduleEntry[]>(() => {
     if (typeof window === 'undefined') {
       return seededEntries
     }
@@ -233,16 +193,20 @@ function App() {
     }
   })
 
+  const [weekOffset, setWeekOffset] = useState(() => {
+    const sourceEntries = entries.length > 0 ? entries : seededEntries
+    const earliestWeek = sourceEntries.reduce((smallest, entry) => {
+      return entry.weekKey < smallest ? entry.weekKey : smallest
+    }, sourceEntries[0]?.weekKey ?? formatDateKey(getMonday(now)))
+
+    const earliestWeekDate = new Date(`${earliestWeek}T00:00:00`)
+    const currentWeekDate = getMonday(now)
+    const differenceInDays = earliestWeekDate.getTime() - currentWeekDate.getTime()
+    return Math.round(differenceInDays / 604800000)
+  })
+
   const currentWeekStart = addWeeks(getMonday(now), weekOffset)
   const currentWeekKey = formatDateKey(currentWeekStart)
-  const [form, setForm] = useState<FormState>(() => createFormState(now, currentWeekStart))
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-  }, [entries])
 
   const currentWeekEntries = sortEntries(
     entries.filter((entry) => entry.weekKey === currentWeekKey),
@@ -255,82 +219,6 @@ function App() {
   })
 
   const weekNumber = getIsoWeekNumber(currentWeekStart)
-
-  function resetForm() {
-    setEditingId(null)
-    setForm(createFormState(new Date(), currentWeekStart))
-  }
-
-  function handleFieldChange<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((current) => ({
-      ...current,
-      [key]: value,
-    }))
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage('')
-    setSuccessMessage('')
-
-    const startMinutes = parseTimeToMinutes(form.start)
-    const endMinutes = parseTimeToMinutes(form.end)
-
-    if (form.title.trim().length < 2) {
-      setErrorMessage('Bitte gib einen aussagekräftigen Titel ein.')
-      return
-    }
-
-    if (endMinutes <= startMinutes) {
-      setErrorMessage('Die Endzeit muss nach der Startzeit liegen.')
-      return
-    }
-
-    const entry: ScheduleEntry = {
-      id: editingId ?? crypto.randomUUID(),
-      weekKey: currentWeekKey,
-      dayIndex: form.dayIndex,
-      title: form.title.trim(),
-      person: form.person,
-      start: form.start,
-      end: form.end,
-      note: form.note.trim(),
-    }
-
-    setEntries((current) => {
-      if (!editingId) {
-        return sortEntries([...current, entry])
-      }
-
-      return sortEntries(current.map((item) => (item.id === editingId ? entry : item)))
-    })
-
-    setSuccessMessage(editingId ? 'Eintrag aktualisiert.' : 'Eintrag gespeichert.')
-    resetForm()
-  }
-
-  function handleEdit(entry: ScheduleEntry) {
-    setEditingId(entry.id)
-    setErrorMessage('')
-    setSuccessMessage('')
-    setForm({
-      title: entry.title,
-      dayIndex: entry.dayIndex,
-      person: entry.person,
-      start: entry.start,
-      end: entry.end,
-      note: entry.note,
-    })
-  }
-
-  function handleDelete(entryId: string) {
-    setEntries((current) => current.filter((entry) => entry.id !== entryId))
-    setSuccessMessage('Eintrag gelöscht.')
-
-    if (editingId === entryId) {
-      resetForm()
-    }
-  }
 
   return (
     <main className="app-shell">
@@ -359,100 +247,7 @@ function App() {
         </div>
       </header>
 
-      <section className="workspace-grid">
-        <article className="form-card">
-          <div className="card-heading">
-            <div>
-              <p className="summary-label">Eintrag</p>
-              <h3>{editingId ? 'Termin bearbeiten' : 'Termin anlegen'}</h3>
-            </div>
-            {editingId ? (
-              <button type="button" className="ghost-button" onClick={resetForm}>
-                Abbrechen
-              </button>
-            ) : null}
-          </div>
-
-          <form className="entry-form" onSubmit={handleSubmit}>
-            <label>
-              Titel
-              <input
-                type="text"
-                placeholder="z. B. Vorlesung, Arbeit, Meeting"
-                value={form.title}
-                onChange={(event) => handleFieldChange('title', event.target.value)}
-              />
-            </label>
-
-            <div className="form-row two-columns">
-              <label>
-                Tag
-                <select
-                  value={form.dayIndex}
-                  onChange={(event) => handleFieldChange('dayIndex', Number(event.target.value))}
-                >
-                  {weekdayLabels.map((label, index) => (
-                    <option key={label} value={index}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Person
-                <select
-                  value={form.person}
-                  onChange={(event) => handleFieldChange('person', event.target.value as PersonId)}
-                >
-                  {(Object.keys(people) as PersonId[]).map((person) => (
-                    <option key={person} value={person}>
-                      {people[person].label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            <div className="form-row two-columns">
-              <label>
-                Start
-                <input
-                  type="time"
-                  value={form.start}
-                  onChange={(event) => handleFieldChange('start', event.target.value)}
-                />
-              </label>
-
-              <label>
-                Ende
-                <input
-                  type="time"
-                  value={form.end}
-                  onChange={(event) => handleFieldChange('end', event.target.value)}
-                />
-              </label>
-            </div>
-
-            <label>
-              Notiz
-              <textarea
-                rows={4}
-                placeholder="Raum, Link, Aufgabe oder kurzer Hinweis"
-                value={form.note}
-                onChange={(event) => handleFieldChange('note', event.target.value)}
-              />
-            </label>
-
-            {errorMessage ? <p className="message error">{errorMessage}</p> : null}
-            {successMessage ? <p className="message success">{successMessage}</p> : null}
-
-            <button type="submit" className="primary-button">
-              {editingId ? 'Aenderung speichern' : 'Im Kalender eintragen'}
-            </button>
-          </form>
-        </article>
-
+      <section className="workspace-grid single-column">
         <article className="planner-card">
           <div className="card-heading">
             <div>
@@ -483,7 +278,7 @@ function App() {
               </div>
 
               <div className="days-grid">
-                {weekDays.map(({ label, date, items, dayIndex }) => (
+                {weekDays.map(({ label, date, items }) => (
                   <section key={label} className="day-column">
                     <div className="day-surface">
                       <div className="day-surface-label" aria-hidden="true">
@@ -505,9 +300,8 @@ function App() {
                         const box = layout[entry.id] ?? { left: 0, width: 100 }
 
                         return (
-                          <button
+                          <div
                             key={entry.id}
-                            type="button"
                             className={`entry-block ${people[entry.person].accent}`}
                             style={{
                               top: `${top}%`,
@@ -516,7 +310,6 @@ function App() {
                               width: `${box.width}%`,
                               right: 'auto',
                             }}
-                            onClick={() => handleEdit(entry)}
                           >
                             <span className="entry-person">{people[entry.person].label}</span>
                             <strong>{entry.title}</strong>
@@ -526,22 +319,9 @@ function App() {
                               </span>
                               {entry.note ? <small>{entry.note}</small> : null}
                             </div>
-                          </button>
+                          </div>
                         )
                       })}
-
-                      {items.length === 0 ? (
-                        <button
-                          type="button"
-                          className="empty-day"
-                          onClick={() => {
-                            setEditingId(null)
-                            setForm((current) => ({ ...current, dayIndex }))
-                          }}
-                        >
-                          Frei · Termin hinzufuegen
-                        </button>
-                      ) : null}
                     </div>
                   </section>
                 ))}
@@ -569,59 +349,12 @@ function App() {
                       <strong>{entry.title}</strong>
                       {entry.note ? <span>{entry.note}</span> : null}
                     </div>
-                    <div className="mobile-entry-actions">
-                      <button type="button" onClick={() => handleEdit(entry)}>
-                        Bearbeiten
-                      </button>
-                      <button type="button" onClick={() => handleDelete(entry.id)}>
-                        Loeschen
-                      </button>
-                    </div>
                   </div>
                 ))}
               </section>
             ))}
           </div>
         </article>
-      </section>
-
-      <section className="list-card">
-        <div className="card-heading">
-          <div>
-            <p className="summary-label">Wochenliste</p>
-            <h3>Alle Eintraege dieser Woche</h3>
-          </div>
-        </div>
-
-        {currentWeekEntries.length === 0 ? (
-          <p className="empty-list">Noch keine Termine gespeichert. Lege links den ersten Eintrag an.</p>
-        ) : (
-          <div className="entry-list">
-            {currentWeekEntries.map((entry) => {
-              const entryDate = addDays(currentWeekStart, entry.dayIndex)
-              return (
-                <article key={`${entry.id}-list`} className="entry-row">
-                  <div className={`entry-avatar ${people[entry.person].accent}`}>{people[entry.person].label}</div>
-                  <div className="entry-copy">
-                    <strong>{entry.title}</strong>
-                    <p>
-                      {weekdayLabels[entry.dayIndex]} · {formatHeaderDate(entryDate)} · {entry.start} - {entry.end}
-                    </p>
-                    {entry.note ? <span>{entry.note}</span> : null}
-                  </div>
-                  <div className="entry-actions">
-                    <button type="button" className="ghost-button" onClick={() => handleEdit(entry)}>
-                      Bearbeiten
-                    </button>
-                    <button type="button" className="ghost-button danger" onClick={() => handleDelete(entry.id)}>
-                      Loeschen
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        )}
       </section>
     </main>
   )
