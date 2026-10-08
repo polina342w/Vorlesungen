@@ -380,7 +380,7 @@
 .entry-block {
   position: absolute;
   left: 8px;
-  right: 8px;
+  right: auto;
   border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 16px;
   padding: 8px 10px;

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { buildDayLayout } from './schedule-layout'
 import './App.css'
 
 type PersonId = 'rosa' | 'blau'
@@ -34,6 +35,73 @@ const people: Record<PersonId, { label: string; accent: string }> = {
 }
 
 const weekdayLabels = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag']
+
+const buildSeedEntries = (weekStart: Date): ScheduleEntry[] => {
+  const weekKey = formatDateKey(weekStart)
+
+  return [
+    {
+      id: 'seed-mathe',
+      weekKey,
+      dayIndex: 0,
+      title: 'Mathe',
+      person: 'rosa',
+      start: '09:00',
+      end: '10:30',
+      note: 'A-102',
+    },
+    {
+      id: 'seed-programmierung',
+      weekKey,
+      dayIndex: 0,
+      title: 'Programmierung',
+      person: 'blau',
+      start: '09:30',
+      end: '11:00',
+      note: 'PC-Labor',
+    },
+    {
+      id: 'seed-physik',
+      weekKey,
+      dayIndex: 1,
+      title: 'Physik',
+      person: 'rosa',
+      start: '10:00',
+      end: '11:30',
+      note: 'Hörsaal 2',
+    },
+    {
+      id: 'seed-geschichte',
+      weekKey,
+      dayIndex: 2,
+      title: 'Geschichte',
+      person: 'blau',
+      start: '08:30',
+      end: '10:00',
+      note: 'Seminarraum',
+    },
+    {
+      id: 'seed-projekt',
+      weekKey,
+      dayIndex: 3,
+      title: 'Projektarbeit',
+      person: 'rosa',
+      start: '13:00',
+      end: '15:30',
+      note: 'Teammeeting',
+    },
+    {
+      id: 'seed-sport',
+      weekKey,
+      dayIndex: 4,
+      title: 'Sport',
+      person: 'blau',
+      start: '11:00',
+      end: '12:30',
+      note: 'Halle B',
+    },
+  ]
+}
 
 const timeMarks = Array.from(
   { length: (DAY_END_HOUR - DAY_START_HOUR) * (60 / SLOT_MINUTES) + 1 },
@@ -155,22 +223,24 @@ function App() {
   const now = new Date()
   const [weekOffset, setWeekOffset] = useState(0)
   const [entries, setEntries] = useState<ScheduleEntry[]>(() => {
+    const seededEntries = buildSeedEntries(currentWeekStart)
+
     if (typeof window === 'undefined') {
-      return []
+      return seededEntries
     }
 
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY)
       if (!raw) {
-        return []
+        return seededEntries
       }
 
       const parsed = JSON.parse(raw)
       if (!Array.isArray(parsed)) {
-        return []
+        return seededEntries
       }
 
-      return parsed.filter((entry): entry is ScheduleEntry => {
+      const validEntries = parsed.filter((entry): entry is ScheduleEntry => {
         return (
           typeof entry?.id === 'string' &&
           typeof entry?.weekKey === 'string' &&
@@ -182,8 +252,10 @@ function App() {
           typeof entry?.note === 'string'
         )
       })
+
+      return validEntries.length > 0 ? validEntries : seededEntries
     } catch {
-      return []
+      return seededEntries
     }
   })
 
@@ -570,13 +642,21 @@ function App() {
                         const totalRange = (DAY_END_HOUR - DAY_START_HOUR) * 60
                         const top = ((startMinutes - DAY_START_HOUR * 60) / totalRange) * 100
                         const height = ((endMinutes - startMinutes) / totalRange) * 100
+                        const layout = buildDayLayout(items)
+                        const box = layout[entry.id] ?? { left: 0, width: 100 }
 
                         return (
                           <button
                             key={entry.id}
                             type="button"
                             className={`entry-block ${people[entry.person].accent}`}
-                            style={{ top: `${top}%`, height: `${height}%` }}
+                            style={{
+                              top: `${top}%`,
+                              height: `${height}%`,
+                              left: `${box.left}%`,
+                              width: `${box.width}%`,
+                              right: 'auto',
+                            }}
                             onClick={() => handleEdit(entry)}
                           >
                             <span className="entry-person">{people[entry.person].label}</span>
