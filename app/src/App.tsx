@@ -20,6 +20,9 @@ const STORAGE_KEY = 'vorlesungen-wochenplan-v1'
 const DAY_START_HOUR = 7
 const DAY_END_HOUR = 19
 const SLOT_MINUTES = 30
+const REMOVED_SEED_ENTRY_IDS = new Set([
+  'seed-blau-2026-11-18-15:00-50',
+])
 
 const people: Record<PersonId, { label: string; accent: string }> = {
   rosa: { label: 'Rosa', accent: 'rose' },
@@ -62,6 +65,9 @@ const rosaSeedSlots = [
   { date: '2026-12-10', start: '13:00', end: '16:00' },
   { date: '2026-12-15', start: '13:00', end: '15:00' },
   { date: '2026-12-16', start: '08:30', end: '10:30' },
+  { date: '2026-11-04', start: '13:00', end: '16:00' },
+  { date: '2026-11-10', start: '10:00', end: '11:00', title: 'Meeting schmalz' },
+  { date: '2026-11-27', start: '15:30', end: '16:30', title: 'SWE Online' },
 ]
 
 const blueSeedSlots = [
@@ -149,6 +155,7 @@ const blueSeedSlots = [
   { date: '2026-12-15', start: '10:30', end: '12:30', title: 'Angewandte Mathe' },
   { date: '2026-12-16', start: '11:00', end: '13:00', title: 'Form. Sp+Autom. 1+2' },
   { date: '2026-12-17', start: '11:00', end: '13:00', title: 'GL des SWE' },
+  { date: '2026-11-30', start: '09:00', end: '18:00', title: 'Weg' },
 ]
 
 const currentWeekSeedSlots: Array<{
@@ -192,7 +199,7 @@ function buildSeedEntries(): ScheduleEntry[] {
     ...rosaSeedSlots.map((slot, index) => createEntry(slot, 'rosa', index)),
     ...blueSeedSlots.map((slot, index) => createEntry(slot, 'blau', index)),
     ...currentWeekSeedSlots.map((slot, index) => createEntry(slot, slot.person, index)),
-  ]
+  ].filter((entry) => !REMOVED_SEED_ENTRY_IDS.has(entry.id))
 }
 
 const timeMarks = Array.from(
@@ -281,6 +288,10 @@ function mergeWithSeedEntries(storedEntries: ScheduleEntry[], seededEntries: Sch
   const mergedEntries = new Map(seededEntries.map((entry) => [entry.id, entry]))
 
   storedEntries.forEach((entry) => {
+    if (REMOVED_SEED_ENTRY_IDS.has(entry.id)) {
+      return
+    }
+
     mergedEntries.set(entry.id, entry)
   })
 
