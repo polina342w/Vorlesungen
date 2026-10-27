@@ -25,6 +25,7 @@ const REMOVED_SEED_ENTRY_IDS = new Set([
   'seed-rosa-2026-11-27-15:30-35',
   'seed-blau-2026-11-30-09:00-84',
   'seed-rosa-2026-11-10-10:00-34',
+  'seed-blau-2026-10-30-09:00-84',
 ])
 
 const people: Record<PersonId, { label: string; accent: string }> = {
