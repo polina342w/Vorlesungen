@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-import { buildDayLayout } from './schedule-layout'
+import { buildDayLayout, buildRecurringRelationshipEntries } from './schedule-layout'
 import { resolveDefaultWeekOffset } from './week-state'
 import { resolveSeedEntryTitle } from './lecture-names'
 
@@ -38,4 +38,24 @@ test('uses the exact lecture names for known seeded dates and times', () => {
     assert.equal(resolveSeedEntryTitle('2026-10-22', '13:00', '16:00'), 'IT-Sicherheit')
     assert.equal(resolveSeedEntryTitle('2026-12-16', '08:30', '09:30'), 'GL K. Intelligenz')
     assert.equal(resolveSeedEntryTitle('2026-12-16', '09:30', '10:30'), 'GL M. Lernverfahren')
+})
+
+test('adds the relationship review block every Monday up to the last seeded week', () => {
+    const entries = [
+        { id: 'a', weekKey: '2026-10-12', dayIndex: 0, title: 'Alpha', person: 'rosa', start: '09:00', end: '10:00', note: '' },
+        { id: 'b', weekKey: '2026-10-19', dayIndex: 0, title: 'Beta', person: 'blau', start: '10:00', end: '11:00', note: '' },
+        { id: 'c', weekKey: '2026-10-26', dayIndex: 0, title: 'Gamma', person: 'rosa', start: '11:00', end: '12:00', note: '' },
+    ] as const
+
+    const generated = buildRecurringRelationshipEntries(entries as any)
+
+    assert.deepEqual(
+        generated.map((entry) => entry.weekKey),
+        ['2026-10-12', '2026-10-19', '2026-10-26'],
+    )
+    assert.equal(generated[0].title, 'Retrospektive Beziehung')
+    assert.equal(generated[0].start, '16:00')
+    assert.equal(generated[0].end, '17:00')
+    assert.equal(generated[0].person, 'neutral')
+    assert.match(generated[0].note, /Haben sich unsere Beziehungen/)
 })

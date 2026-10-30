@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { buildDayLayout } from './schedule-layout'
+import { buildDayLayout, buildRecurringRelationshipEntries } from './schedule-layout'
 import { resolveSeedEntryTitle } from './lecture-names'
 import './App.css'
 
-type PersonId = 'rosa' | 'blau'
+type PersonId = 'rosa' | 'blau' | 'neutral'
 
 type ScheduleEntry = {
   id: string
@@ -31,6 +31,7 @@ const REMOVED_SEED_ENTRY_IDS = new Set([
 const people: Record<PersonId, { label: string; accent: string }> = {
   rosa: { label: 'Rosa', accent: 'rose' },
   blau: { label: 'Blau', accent: 'blue' },
+  neutral: { label: 'Beziehung', accent: 'gray' },
 }
 
 const weekdayLabels = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag']
@@ -169,10 +170,10 @@ const currentWeekSeedSlots: Array<{
   title: string
   person: PersonId
 }> = [
-  { date: '2026-10-08', start: '13:00', end: '16:00', title: 'IT-Sicherheit', person: 'rosa' },
-  { date: '2026-10-08', start: '13:00', end: '14:30', title: 'Form. Sp+Autom. 1+2', person: 'blau' },
-  { date: '2026-10-08', start: '15:30', end: '18:45', title: 'C/C++', person: 'blau' },
-]
+    { date: '2026-10-08', start: '13:00', end: '16:00', title: 'IT-Sicherheit', person: 'rosa' },
+    { date: '2026-10-08', start: '13:00', end: '14:30', title: 'Form. Sp+Autom. 1+2', person: 'blau' },
+    { date: '2026-10-08', start: '15:30', end: '18:45', title: 'C/C++', person: 'blau' },
+  ]
 
 function buildSeedEntries(): ScheduleEntry[] {
   const createEntry = (
@@ -199,11 +200,16 @@ function buildSeedEntries(): ScheduleEntry[] {
     }
   }
 
-  return [
+  const seededEntries = [
     ...rosaSeedSlots.map((slot, index) => createEntry(slot, 'rosa', index)),
     ...blueSeedSlots.map((slot, index) => createEntry(slot, 'blau', index)),
     ...currentWeekSeedSlots.map((slot, index) => createEntry(slot, slot.person, index)),
   ].filter((entry) => !REMOVED_SEED_ENTRY_IDS.has(entry.id))
+
+  return [
+    ...seededEntries,
+    ...buildRecurringRelationshipEntries(seededEntries),
+  ]
 }
 
 const timeMarks = Array.from(
@@ -329,7 +335,7 @@ function App() {
           typeof entry?.weekKey === 'string' &&
           typeof entry?.dayIndex === 'number' &&
           typeof entry?.title === 'string' &&
-          (entry?.person === 'rosa' || entry?.person === 'blau') &&
+          (entry?.person === 'rosa' || entry?.person === 'blau' || entry?.person === 'neutral') &&
           typeof entry?.start === 'string' &&
           typeof entry?.end === 'string' &&
           typeof entry?.note === 'string'
