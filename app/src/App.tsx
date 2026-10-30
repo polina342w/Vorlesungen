@@ -514,11 +514,6 @@ function App() {
                                 {entry.start}–{entry.end}
                               </span>
                               <strong>{entry.title}</strong>
-                              {entry.note ? (
-                                <div className="entry-footer">
-                                  <small>{entry.note}</small>
-                                </div>
-                              ) : null}
                             </>
                           )}
                         </button>
@@ -552,7 +547,6 @@ function App() {
                     <span className="mobile-person-tag">{people[entry.person].label}</span>
                     <p>{entry.start} - {entry.end}</p>
                     <strong>{entry.title}</strong>
-                    {entry.note ? <span>{entry.note}</span> : null}
                   </div>
                 </button>
               ))}
